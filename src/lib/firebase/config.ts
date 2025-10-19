@@ -18,27 +18,34 @@ let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 
-if (typeof window !== "undefined" && !getApps().length) {
+// This function ensures Firebase is initialized only once.
+function initializeFirebase() {
+  if (getApps().length > 0) {
+    app = getApp();
+  } else {
     app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    storage = getStorage(app);
+  }
 
-    console.log("Connecting to Firebase Emulators...");
-    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-    connectFirestoreEmulator(db, "127.0.0.1", 8080);
-    connectStorageEmulator(storage, "127.0.0.1", 9199);
-    console.log("Successfully connected to Firebase Emulators.");
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
 
-} else {
-    if (!getApps().length) {
-        app = initializeApp(firebaseConfig);
-    } else {
-        app = getApp();
+  // This is the key change: Connect to emulators if they are running.
+  // The process.env.NODE_ENV check ensures this only happens in development.
+  if (process.env.NODE_ENV === 'development') {
+    // Check if emulators are already connected to avoid re-connecting
+    // The `_isInitialized` property is an unofficial way to check, but effective.
+    if (!(auth as any)._isInitialized) {
+        console.log("Connecting to Firebase Emulators...");
+        connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+        connectFirestoreEmulator(db, "127.0.0.1", 8080);
+        connectStorageEmulator(storage, "127.0.0.1", 9199);
+        console.log("Successfully connected to Firebase Emulators.");
     }
-    auth = getAuth(app);
-    db = getFirestore(app);
-    storage = getStorage(app);
+  }
 }
+
+// Call the initialization function to set up the services.
+initializeFirebase();
 
 export { app, auth, db, storage };

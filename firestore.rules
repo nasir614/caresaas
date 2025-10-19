@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ✅ Public paths (for development or public info)
+    match /public/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // 🏢 TENANT ROOT: tenants/{tenantId}
+    match /tenants/{tenantId} {
+      
+      // ========== ORGANIZATIONS ==========
+      match /organizations/{orgId} {
+        allow read, write: if isTenantUser(tenantId);
+      }
+
+      // ========== CLIENTS ==========
+      match /clients/{clientId} {
+        allow read: if isTenantUser(tenantId);
+        allow create, update, delete: if hasRole(tenantId, ['admin', 'org_admin']);
+      }
+      match /clients/{clientId}/{document=**} {
+        allow read: if isTenantUser(tenantId);
+        allow write: if hasRole(tenantId, ['admin', 'org_admin']);
+      }
+
+
+      // ========== STAFF ==========
+      match /staff/{staffId} {
+        allow read: if isTenantUser(tenantId);
+        allow write: if hasRole(tenantId, ['admin', 'org_admin']);
+      }
+      match /staff/{staffId}/{document=**} {
+        allow read: if isTenantUser(tenantId);
+        allow write: if hasRole(tenantId, ['admin', 'org_admin']);
+      }
+
+      // ========== ATTENDANCE ==========
+      match /attendance/{recordId} {
+        allow read: if isTenantUser(tenantId);
+        allow create: if hasRole(tenantId, ['caregiver', 'nurse', 'org_admin', 'admin']);
+        allow update, delete: if hasRole(tenantId, ['org_admin', 'admin']);
+      }
+
+      // ========== BILLING ==========
+      match /billing/{billId} {
+        allow read: if hasRole(tenantId, ['admin', 'org_admin']);
+        allow write: if hasRole(tenantId, ['admin']);
+      }
+
+      // ========== COMPLIANCE ==========
+      match /compliance/{recordId} {
+        allow read: if isTenantUser(tenantId);
+        allow write: if hasRole(tenantId, ['org_admin', 'admin']);
+      }
+
+      // ========== TRANSPORTATION ==========
+      match /transportation/{tripId} {
+        allow read: if isTenantUser(tenantId);
+        allow write: if hasRole(tenantId, ['caregiver', 'org_admin', 'admin']);
+      }
+
+      // ========== NOTIFICATIONS ==========
+      match /notifications/{noteId} {
+        allow read, write: if isTenantUser(tenantId);
+      }
+
+      // ========== BILLING & PAYMENTS ==========
+      match /payments/{paymentId} {
+        allow read: if hasRole(tenantId, ['admin']);
+        allow write: if hasRole(tenantId, ['admin']);
+      }
+    }
+
+    // 🔐 Fallback deny-all
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ===================================================
+// 🔧 Custom Functions for Tenant + Role Enforcement
+// ===================================================
+
+function isSignedIn() {
+  return request.auth != null;
+}
+
+function isTenantUser(tenantId) {
+  // In our setup, the user's UID is their tenantId
+  return isSignedIn() && request.auth.uid == tenantId;
+}
+
+function hasRole(tenantId, allowedRoles) {
+  // Roles are stored in custom claims on the user's auth token
+  return isTenantUser(tenantId)
+    && request.auth.token.role in allowedRoles;
+}

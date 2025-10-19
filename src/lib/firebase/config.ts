@@ -1,43 +1,46 @@
 // src/lib/firebase/config.ts
-import { initializeApp, getApps, getApp } from "firebase/app";
-import {
-  getFirestore,
-  connectFirestoreEmulator,
-} from "firebase/firestore";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
-import { getStorage, connectStorageEmulator } from "firebase/storage";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getFirestore, connectFirestoreEmulator, type Firestore } from "firebase/firestore";
+import { getAuth, connectAuthEmulator, type Auth } from "firebase/auth";
+import { getStorage, connectStorageEmulator, type FirebaseStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration, using environment variables
-// NOTE: These are now placeholders as we are forcing emulator connection.
+// Your web app's Firebase configuration, using environment variables.
+// These are sourced from .env.local during local development.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "dummy-key",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "dummy-domain",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "dummy-project",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "dummy-bucket",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "dummy-sender",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "dummy-app",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase safely
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+let storage: FirebaseStorage;
 
-// Initialize services
-const db = getFirestore(app);
-const auth = getAuth(app);
-const storage = getStorage(app);
+// Initialize Firebase safely for client-side rendering
+if (typeof window !== "undefined" && !getApps().length) {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+  
+  // This is a critical step for development in environments
+  // like Firebase Studio / Cloud Workstations, which have restricted
+  // outbound network access.
+  console.log("Connecting to Firebase Emulators");
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
 
-// FORCED EMULATOR CONNECTION FOR DEVELOPMENT
-// This block is critical for ensuring connectivity in environments
-// like Cloud Workstations / Firebase Studio. It bypasses any potential
-// issues with environment variable detection or network policies.
-console.log("⚙️ Forcing connection to Firebase Emulators");
+} else if (getApps().length) {
+  app = getApp();
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+}
 
-// Point Firestore to the local emulator
-connectFirestoreEmulator(db, "127.0.0.1", 8080);
-// Point Auth to the local emulator
-connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-// Point Storage to the local emulator
-connectStorageEmulator(storage, "127.0.0.1", 9199);
-
-
+// @ts-ignore
 export { app, auth, db, storage };

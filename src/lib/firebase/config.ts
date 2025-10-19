@@ -18,34 +18,27 @@ let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 
-// This ensures we initialize on the client-side only, but the instances
-// are created and exported for server-side use as well.
 if (typeof window !== "undefined" && !getApps().length) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
 
-    // Force connection to emulators in the development environment
-    // This is the most reliable way to avoid network issues in Cloud Workstations
     console.log("Connecting to Firebase Emulators...");
     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
     connectFirestoreEmulator(db, "127.0.0.1", 8080);
     connectStorageEmulator(storage, "127.0.0.1", 9199);
     console.log("Successfully connected to Firebase Emulators.");
-} else if (getApps().length) {
-    // If the app is already initialized, get the existing instances
-    app = getApp();
-    auth = getAuth(app);
-    db = getFirestore(app);
-    storage = getStorage(app);
+
 } else {
-    // For server-side rendering, initialize a new app
-    app = initializeApp(firebaseConfig);
+    if (!getApps().length) {
+        app = initializeApp(firebaseConfig);
+    } else {
+        app = getApp();
+    }
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
 }
-
 
 export { app, auth, db, storage };

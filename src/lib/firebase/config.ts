@@ -1,9 +1,8 @@
+
 // src/lib/firebase/config.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getFirestore,
-  initializeFirestore,
-  memoryLocalCache,
   connectFirestoreEmulator,
 } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
@@ -28,13 +27,14 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 
 // Connect to emulators in development.
-// This block MUST be after the service initializations.
+// This block is critical for ensuring connectivity in environments
+// like Cloud Workstations / Firebase Studio.
 if (process.env.NODE_ENV === "development") {
   console.log("⚙️ Using Firebase Emulators");
   // Point Firestore to the local emulator
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
   // Point Auth to the local emulator
-  connectAuthEmulator(auth, "http://127.0.0.1:9099");
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
   // Point Storage to the local emulator
   connectStorageEmulator(storage, "127.0.0.1", 9199);
 }

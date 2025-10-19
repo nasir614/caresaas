@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Users, Activity, ShieldCheck, CreditCard } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { useEffect } from "react";
 
 const heroImage = PlaceHolderImages.find(img => img.id === "hero");
 
@@ -30,7 +35,7 @@ const featureItems = [
   },
 ];
 
-export default function Home() {
+function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center bg-background/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
@@ -150,4 +155,28 @@ export default function Home() {
       </footer>
     </div>
   );
+}
+
+export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/dashboard');
+    }
+  }, [user, loading, router]);
+
+  // While loading, or if the user is authenticated, we show a loading screen.
+  // The useEffect above will handle the redirect.
+  if (loading || user) {
+    return (
+        <div className="flex min-h-screen items-center justify-center">
+            <div className="text-2xl font-bold">Loading...</div>
+        </div>
+    )
+  }
+
+  // If not loading and no user, show the public landing page.
+  return <LandingPage />;
 }

@@ -1,10 +1,19 @@
 "use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Users, UserCog, CheckSquare,
-  Truck, ShieldCheck, CreditCard, BarChart3, Menu, X,
+  LayoutDashboard,
+  Users,
+  UserCog,
+  CheckSquare,
+  Truck,
+  ShieldCheck,
+  CreditCard,
+  BarChart3,
+  Menu,
+  X,
 } from "lucide-react";
 
 const links = [
@@ -25,24 +34,42 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* mobile toggle button */}
+      {/* Mobile toggle button */}
       <button
-        onClick={() => setOpen(!open)}
-        className="md:hidden fixed top-3 left-3 z-50 bg-primary text-white p-2 rounded-lg shadow-lg"
+        onClick={() => setOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-50 bg-primary text-white p-2 rounded-lg shadow-lg hover:bg-blue-600 transition"
+        aria-label="Open menu"
       >
-        {open ? <X size={18} /> : <Menu size={18} />}
+        <Menu size={20} />
       </button>
 
-      {/* sidebar */}
+      {/* Dark overlay (mobile only) */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden animate-fade-in"
+        />
+      )}
+
+      {/* Sidebar */}
       <aside
         className={`${
           open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transform transition-transform duration-300 md:flex flex-col w-64 h-screen bg-white border-r shadow-sm fixed md:static z-40`}
+        } md:translate-x-0 transform transition-transform duration-300 md:flex flex-col w-64 h-screen bg-white border-r shadow-sm fixed md:static z-50`}
       >
-        <div className="px-6 py-4 text-xl font-bold text-primary border-b">
-          CareCloud SaaS
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <h1 className="text-lg font-bold text-primary">CareCloud SaaS</h1>
+          <button
+            onClick={() => setOpen(false)}
+            className="md:hidden text-gray-500 hover:text-gray-700"
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
         </div>
 
+        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {links.map(({ href, label, icon: Icon }) => {
             const active = adjustedPath.startsWith(href);
@@ -64,6 +91,7 @@ export default function Sidebar() {
           })}
         </nav>
 
+        {/* Footer */}
         <div className="px-4 py-3 border-t text-xs text-gray-500">
           © {new Date().getFullYear()} CareCloud
         </div>

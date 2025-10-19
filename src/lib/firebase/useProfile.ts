@@ -1,36 +1,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { db } from "./config";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { db, auth } from "./config";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { uploadProfileImage } from "./storage";
-import { auth } from "./config";
+import type { User } from "firebase/auth";
 
 export function useProfile() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async (user: any) => {
-      if (!user) {
-        setProfile(null);
-        setLoading(false);
-        return;
-      }
+    const fetchProfile = async (user: User) => {
+      setLoading(true);
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
         setProfile(snap.data());
       } else {
-        // To ensure profile is populated with email if it's a new user
-        setProfile({ email: user.email });
+        // If no profile exists, create a placeholder from auth data
+        setProfile({ email: user.email, photoURL: user.photoURL });
       }
       setLoading(false);
     };
 
     const unsub = auth.onAuthStateChanged((user) => {
-      setLoading(true);
-      fetchProfile(user);
+      if (user) {
+        fetchProfile(user);
+      } else {
+        setProfile(null);
+        setLoading(false);
+      }
     });
 
     return () => unsub();

@@ -2,8 +2,10 @@ import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import type { ReactNode } from "react";
-import { AuthProvider } from "@/lib/hooks/useAuth";
+import { AuthProvider } from "@/lib/hooks/useAuth.tsx";
 import { Toaster } from "@/components/ui/toaster";
+import { SidebarProvider } from "@/components/ui/sidebar";
+
 
 export const metadata = {
   title: "CareCloud SaaS",
@@ -20,7 +22,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
-            {children}
+          <SidebarProvider>
+            <div className="flex min-h-screen bg-surface text-gray-800">
+                <Sidebar />
+                <div className="flex flex-1 flex-col min-h-screen bg-surface">
+                    <Header />
+                    <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+                </div>
+            </div>
+          </SidebarProvider>
         </AuthProvider>
         <Toaster />
       </body>

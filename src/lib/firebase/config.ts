@@ -34,7 +34,7 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 
 // ✅ Automatically switch to emulators when in a dev environment
-if (typeof window !== "undefined" && window.location.hostname.includes("localhost")) {
+if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname.includes("cloudworkstations.dev"))) {
   console.log("⚙️ Using Firebase Emulators");
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
   connectAuthEmulator(auth, "http://127.0.0.1:9099");

@@ -1,5 +1,7 @@
-// In a real application, you would initialize Firebase here.
-// For security, these should be stored in environment variables.
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,29 +12,9 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Example of how you might initialize Firebase (implementation not included):
-/*
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-let firebaseApp;
-
-if (!getApps().length) {
-  firebaseApp = initializeApp(firebaseConfig);
-} else {
-  firebaseApp = getApps()[0];
-}
-
-export const auth = getAuth(firebaseApp);
-export const db = getFirestore(firebaseApp);
-export const storage = getStorage(firebaseApp);
-*/
-
-console.log("Firebase config loaded (placeholders)");
-
-// Placeholder exports
-export const auth = {};
-export const db = {};
-export const storage = {};
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);

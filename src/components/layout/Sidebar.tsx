@@ -25,6 +25,9 @@ const links = [
 
 export default function Sidebar() {
   const path = usePathname();
+  // We need to check against the (protected) group path
+  const adjustedPath = path.replace('/(protected)','');
+
   return (
     <aside className="hidden md:flex flex-col w-64 h-screen bg-white border-r shadow-sm sticky top-0">
       <div className="px-6 py-4 text-xl font-bold text-primary border-b">
@@ -32,7 +35,7 @@ export default function Sidebar() {
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {links.map(({ href, label, icon: Icon }) => {
-          const active = path.startsWith(href);
+          const active = adjustedPath.startsWith(href);
           return (
             <Link
               key={href}

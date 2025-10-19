@@ -29,12 +29,19 @@ if (!getApps().length) {
     // Connect to emulators in development.
     // The `process.env.NODE_ENV` check ensures this only runs in dev,
     // and the `!auth.emulatorConfig` check prevents reconnecting on hot reloads.
-    if (process.env.NODE_ENV === 'development' && !auth.emulatorConfig) {
+    if (process.env.NODE_ENV === 'development') {
         console.log("Connecting to Firebase Emulators...");
         try {
-            connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-            connectFirestoreEmulator(db, "127.0.0.1", 8080);
-            connectStorageEmulator(storage, "127.0.0.1", 9199);
+            // Check if not already connected
+            if (!auth.emulatorConfig) {
+                connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+            }
+            if (!(db.toJSON() as any).settings.host) {
+                 connectFirestoreEmulator(db, "127.0.0.1", 8080);
+            }
+            if (!(storage as any).emulator) {
+                connectStorageEmulator(storage, "127.0.0.1", 9199);
+            }
             console.log("Successfully connected to Firebase Emulators.");
         } catch (e) {
             console.error("Error connecting to Firebase emulators:", e);

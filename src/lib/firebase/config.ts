@@ -1,3 +1,4 @@
+
 // src/lib/firebase/config.ts
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getFirestore, connectFirestoreEmulator, type Firestore } from "firebase/firestore";
@@ -18,23 +19,17 @@ let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 
-if (typeof window === 'undefined') {
-  // Server-side initialization
-  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-} else {
-  // Client-side initialization
-  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-}
+// Singleton pattern to initialize Firebase app only once
+if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
 
-auth = getAuth(app);
-db = getFirestore(app);
-storage = getStorage(app);
-
-if (process.env.NODE_ENV === 'development') {
-    // This is a workaround for a bug in the Firebase SDK where it doesn't
-    // handle HMR correctly, so we connect only once.
-    // @ts-ignore
-    if (!globalThis._firebaseEmulatorsConnected) {
+    // Connect to emulators in development.
+    // The `process.env.NODE_ENV` check ensures this only runs in dev,
+    // and the `!auth.emulatorConfig` check prevents reconnecting on hot reloads.
+    if (process.env.NODE_ENV === 'development' && !auth.emulatorConfig) {
         console.log("Connecting to Firebase Emulators...");
         try {
             connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
@@ -44,9 +39,13 @@ if (process.env.NODE_ENV === 'development') {
         } catch (e) {
             console.error("Error connecting to Firebase emulators:", e);
         }
-        // @ts-ignore
-        globalThis._firebaseEmulatorsConnected = true;
     }
+} else {
+    // If the app is already initialized, get the existing instances
+    app = getApp();
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
 }
 
 export { app, auth, db, storage };

@@ -4,9 +4,10 @@ import {
   getFirestore,
   initializeFirestore,
   memoryLocalCache, // disables offline mode for Cloud Workstations
+  connectFirestoreEmulator,
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 // ✅ Your exact Firebase config from environment variables
 const firebaseConfig = {
@@ -31,5 +32,14 @@ const auth = getAuth(app);
 
 // ✅ Firebase Storage
 const storage = getStorage(app);
+
+// ✅ Automatically switch to emulators when in a dev environment
+if (typeof window !== "undefined" && window.location.hostname.includes("localhost")) {
+  console.log("⚙️ Using Firebase Emulators");
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectAuthEmulator(auth, "http://127.0.0.1:9099");
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
+}
+
 
 export { app, auth, db, storage };

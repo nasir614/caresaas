@@ -11,19 +11,29 @@ export function useProfile() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const user = auth.currentUser;
+    const fetchProfile = async (user: any) => {
       if (!user) {
+        setProfile(null);
         setLoading(false);
         return;
-      };
+      }
       const ref = doc(db, "users", user.uid);
       const snap = await getDoc(ref);
-      if (snap.exists()) setProfile(snap.data());
+      if (snap.exists()) {
+        setProfile(snap.data());
+      } else {
+        // To ensure profile is populated with email if it's a new user
+        setProfile({ email: user.email });
+      }
       setLoading(false);
     };
-    const unsub = auth.onAuthStateChanged(fetchProfile)
-    return () => unsub()
+
+    const unsub = auth.onAuthStateChanged((user) => {
+      setLoading(true);
+      fetchProfile(user);
+    });
+
+    return () => unsub();
   }, []);
 
   const updateProfilePhoto = async (file: File) => {

@@ -1,26 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import {
-  Bell,
   CircleUser,
-  Home,
-  LineChart,
-  Menu,
-  Package,
-  Package2,
   Search,
-  ShoppingCart,
-  Users,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,9 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Breadcrumbs from "./Breadcrumbs";
-import { SidebarTrigger, useSidebar } from "../ui/sidebar";
+import { SidebarTrigger } from "../ui/sidebar";
 
 function UserNav() {
     return (
@@ -58,7 +43,6 @@ function UserNav() {
 }
 
 export default function Header() {
-  const { toggleSidebar } = useSidebar();
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
         <SidebarTrigger className="sm:hidden" />

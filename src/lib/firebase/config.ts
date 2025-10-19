@@ -41,5 +41,4 @@ if (typeof window !== "undefined" && (window.location.hostname === "localhost" |
   connectStorageEmulator(storage, "127.0.0.1", 9199);
 }
 
-
 export { app, auth, db, storage };

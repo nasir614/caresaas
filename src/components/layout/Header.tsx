@@ -6,6 +6,7 @@ import { useProfile } from "@/lib/firebase/useProfile";
 import { logoutUser } from "@/lib/firebase/auth";
 import Image from "next/image";
 import { ChevronDown, LogOut, User, Menu } from "lucide-react";
+import NotificationCenter from "@/components/ui/NotificationCenter";
 
 export default function Header() {
   const { profile } = useProfile();
@@ -20,9 +21,10 @@ export default function Header() {
   };
 
   const getPageTitle = () => {
+    if (!pathname) return "Dashboard";
     const path = pathname.split("/").pop() || "dashboard";
     if (path === 'profile') return 'User Profile';
-    return path.charAt(0).toUpperCase() + path.slice(1);
+    return path.charAt(0).toUpperCase() + path.slice(1).replace(/-/g, ' ');
   };
 
   useEffect(() => {
@@ -41,47 +43,50 @@ export default function Header() {
         <h1 className="text-lg font-semibold text-gray-800 font-headline hidden sm:block">{getPageTitle()}</h1>
       </div>
 
-      <div className="relative" ref={ref}>
-        <button
-          onClick={() => setOpen(!open)}
-          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2 py-1.5 hover:bg-gray-50 transition"
-        >
-          {profile?.photoURL ? (
-            <Image
-              src={profile.photoURL}
-              width={28}
-              height={28}
-              alt="avatar"
-              className="rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-semibold">
-              {profile?.email?.[0]?.toUpperCase() ?? "U"}
+      <div className="flex items-center gap-4">
+        <NotificationCenter />
+        <div className="relative" ref={ref}>
+          <button
+            onClick={() => setOpen(!open)}
+            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2 py-1.5 hover:bg-gray-50 transition"
+          >
+            {profile?.photoURL ? (
+              <Image
+                src={profile.photoURL}
+                width={28}
+                height={28}
+                alt="avatar"
+                className="rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm font-semibold">
+                {profile?.email?.[0]?.toUpperCase() ?? "U"}
+              </div>
+            )}
+            <span className="hidden sm:block text-sm font-medium text-gray-700">{profile?.email}</span>
+            <ChevronDown size={16} className="text-gray-600" />
+          </button>
+
+          {open && (
+            <div className="absolute right-0 mt-2 w-48 bg-white border shadow-md rounded-lg z-50 animate-fade-in">
+              <button
+                onClick={() => {
+                  router.push("/profile");
+                  setOpen(false);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+              >
+                <User size={16} /> Profile
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
+              >
+                <LogOut size={16} /> Logout
+              </button>
             </div>
           )}
-          <span className="hidden sm:block text-sm font-medium text-gray-700">{profile?.email}</span>
-          <ChevronDown size={16} className="text-gray-600" />
-        </button>
-
-        {open && (
-          <div className="absolute right-0 mt-2 w-48 bg-white border shadow-md rounded-lg z-50 animate-fade-in">
-            <button
-              onClick={() => {
-                router.push("/profile");
-                setOpen(false);
-              }}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-            >
-              <User size={16} /> Profile
-            </button>
-            <button
-              onClick={handleLogout}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
-            >
-              <LogOut size={16} /> Logout
-            </button>
-          </div>
-        )}
+        </div>
       </div>
     </header>
   );

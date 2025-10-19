@@ -4,14 +4,13 @@ import { getFirestore, connectFirestoreEmulator, type Firestore } from "firebase
 import { getAuth, connectAuthEmulator, type Auth } from "firebase/auth";
 import { getStorage, connectStorageEmulator, type FirebaseStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration, using environment variables.
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    apiKey: "AIzaSyA2nfco9xBvpy4G-8FPtz-07MmtI-XdZRY",
+    authDomain: "studio-8082800862-2cf3e.firebaseapp.com",
+    projectId: "studio-8082800862-2cf3e",
+    storageBucket: "studio-8082800862-2cf3e.appspot.com",
+    messagingSenderId: "710900543925",
+    appId: "1:710900543925:web:2b42cccf2e8e5c03ab69fc"
 };
 
 let app: FirebaseApp;
@@ -29,30 +28,23 @@ auth = getAuth(app);
 db = getFirestore(app);
 storage = getStorage(app);
 
-// Connect to emulators in development
-if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-  console.log("Connecting to Firebase Emulators...");
-  try {
-    connectFirestoreEmulator(db, "127.0.0.1", 8080);
-    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-    connectStorageEmulator(storage, "127.0.0.1", 9199);
-    console.log("Successfully connected to Firebase Emulators.");
-  } catch (e) {
-    console.error("Error connecting to Firebase emulators:", e);
-  }
-} else if (process.env.NODE_ENV === 'development' && !globalThis._firebaseEmulatorsConnected) {
-  // This check is for the server-side part in a dev environment
-  console.log("Connecting to Firebase Emulators (Server)...");
-   try {
-    connectFirestoreEmulator(db, "127.0.0.1", 8080);
-    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-    connectStorageEmulator(storage, "127.0.0.1", 9199);
-    console.log("Successfully connected to Firebase Emulators (Server).");
+if (process.env.NODE_ENV === 'development') {
+    //This is a workaround for a bug in the Firebase SDK where it doesn't
+    //handle HMR correctly.
     // @ts-ignore
-    globalThis._firebaseEmulatorsConnected = true;
-  } catch (e) {
-    console.error("Error connecting to Firebase emulators (Server):", e);
-  }
+    if (!globalThis._firebaseEmulatorsConnected) {
+        console.log("Connecting to Firebase Emulators...");
+        try {
+            connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+            connectFirestoreEmulator(db, "127.0.0.1", 8080);
+            connectStorageEmulator(storage, "127.0.0.1", 9199);
+            console.log("Successfully connected to Firebase Emulators.");
+        } catch (e) {
+            console.error("Error connecting to Firebase emulators:", e);
+        }
+        // @ts-ignore
+        globalThis._firebaseEmulatorsConnected = true;
+    }
 }
 
 

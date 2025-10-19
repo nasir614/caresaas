@@ -30,11 +30,13 @@ const links = [
 export default function Sidebar() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
-  const adjustedPath = path.replace("/(protected)", "");
+
+  // The `(protected)` group segment is not part of the URL path
+  const adjustedPath = path;
 
   return (
     <>
-      {/* Mobile toggle button */}
+      {/* Mobile: toggle button */}
       <button
         onClick={() => setOpen(true)}
         className="md:hidden fixed top-4 left-4 z-50 bg-primary text-white p-2 rounded-lg shadow-lg hover:bg-blue-600 transition"
@@ -43,7 +45,7 @@ export default function Sidebar() {
         <Menu size={20} />
       </button>
 
-      {/* Dark overlay (mobile only) */}
+      {/* Mobile: dark overlay */}
       {open && (
         <div
           onClick={() => setOpen(false)}
@@ -55,11 +57,11 @@ export default function Sidebar() {
       <aside
         className={`${
           open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transform transition-transform duration-300 w-64 h-screen bg-white border-r shadow-sm fixed md:sticky md:top-0 z-50 flex-col flex`}
+        } md:translate-x-0 transform transition-transform duration-300 w-64 h-screen bg-white border-r shadow-sm fixed md:sticky md:top-0 z-50 flex flex-col`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h1 className="text-lg font-bold text-primary">CareCloud SaaS</h1>
+          <h1 className="text-lg font-bold text-primary">CareCloud</h1>
           <button
             onClick={() => setOpen(false)}
             className="md:hidden text-gray-500 hover:text-gray-700"

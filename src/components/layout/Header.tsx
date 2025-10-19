@@ -18,17 +18,19 @@ export default function Header() {
     router.push("/auth/login");
   };
 
-  // click outside close
+  // Click outside to close dropdown
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   return (
-    <header className="flex items-center justify-between h-14 px-6 bg-white border-b shadow-sm sticky top-0 z-10">
+    <header className="flex items-center justify-between h-14 px-6 bg-white border-b shadow-sm sticky top-0 z-30">
       <h1 className="text-lg font-semibold text-gray-800">Dashboard</h1>
 
       <div className="relative" ref={ref}>

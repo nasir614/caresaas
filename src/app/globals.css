@@ -5,7 +5,7 @@
 html,
 body {
   height: 100%;
-  background-color: #f8fafc;
+  background-color: #f8fafc; /* Asana-style light gray background */
 }
 
 body {
@@ -21,7 +21,7 @@ body {
 }
 
 .text-primary {
-  color: #2563eb; /* Asana-style blue */
+  color: #2563eb;
 }
 .bg-primary\/10 {
   background-color: rgba(37, 99, 235, 0.1);
@@ -30,6 +30,7 @@ body {
   background-color: rgba(37, 99, 235, 0.05);
 }
 
+/* Animation for sidebar overlay and dropdowns */
 @keyframes fadeIn {
   from {
     opacity: 0;

@@ -8,6 +8,7 @@ import {
   doc,
   query,
   where,
+  Timestamp,
 } from "firebase/firestore";
 
 export interface Client {
@@ -18,6 +19,8 @@ export interface Client {
   email?: string;
   address?: string;
   notes?: string;
+  userId?: string;
+  createdAt?: Timestamp;
 }
 
 export async function getClients(): Promise<Client[]> {
@@ -28,10 +31,14 @@ export async function getClients(): Promise<Client[]> {
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Client[];
 }
 
-export async function addClient(data: Client) {
+export async function addClient(data: Omit<Client, 'id' | 'userId' | 'createdAt'>) {
   const user = auth.currentUser;
   if (!user) throw new Error("Unauthorized");
-  await addDoc(collection(db, "clients"), { ...data, userId: user.uid });
+  await addDoc(collection(db, "clients"), { 
+    ...data, 
+    userId: user.uid,
+    createdAt: Timestamp.now(),
+  });
 }
 
 export async function updateClient(id: string, data: Partial<Client>) {

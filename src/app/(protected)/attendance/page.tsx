@@ -1,26 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  getAttendanceByDate,
+  addAttendance,
+  AttendanceRecord,
+} from "@/lib/firebase/attendance";
 import { getClients, Client } from "@/lib/firebase/clients";
-import { addAttendance, getAttendanceByDate, AttendanceRecord } from "@/lib/firebase/attendance";
 import { Check, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function AttendancePage() {
   const [clients, setClients] = useState<Client[]>([]);
-  const [attendance, setAttendance] = useState<Map<string, AttendanceRecord>>(new Map());
+  const [attendance, setAttendance] = useState<Map<string, AttendanceRecord>>(
+    new Map()
+  );
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   const loadData = async (date: string) => {
     setLoading(true);
     try {
       const clientData = await getClients();
       setClients(clientData);
-      
+
       const attendanceData = await getAttendanceByDate(date);
       const attendanceMap = new Map<string, AttendanceRecord>();
-      attendanceData.forEach(record => {
-        if(record.clientId) attendanceMap.set(record.clientId, record);
+      attendanceData.forEach((record) => {
+        if (record.clientId) attendanceMap.set(record.clientId, record);
       });
       setAttendance(attendanceMap);
     } catch (error) {
@@ -40,14 +49,19 @@ export default function AttendancePage() {
 
   const handleToggle = async (clientId: string, isPresent: boolean) => {
     const existingRecord = attendance.get(clientId);
-    const newStatus = existingRecord?.status === (isPresent ? 'present' : 'absent') ? 'unchecked' : (isPresent ? 'present' : 'absent');
-    
+    const newStatus =
+      existingRecord?.status === (isPresent ? "present" : "absent")
+        ? "unchecked"
+        : isPresent
+        ? "present"
+        : "absent";
+
     await addAttendance({
-        clientId,
-        date: selectedDate,
-        status: newStatus,
+      clientId,
+      date: selectedDate,
+      status: newStatus,
     });
-    
+
     // Refresh data after update
     await loadData(selectedDate);
   };
@@ -65,44 +79,59 @@ export default function AttendancePage() {
       </div>
 
       {loading ? (
-        <p className="text-center mt-10 text-gray-500">Loading attendance data...</p>
+        <div className="text-center py-12 px-4 border-2 border-dashed rounded-lg">
+           <p className="text-center mt-10 text-gray-500">Loading attendance data...</p>
+        </div>
       ) : clients.length === 0 ? (
         <div className="text-center py-12 px-4 border-2 border-dashed rounded-lg">
-          <h3 className="text-lg font-medium text-gray-700">No Clients Found</h3>
-          <p className="text-sm text-gray-500 mt-1">Add clients to start tracking attendance.</p>
+          <h3 className="text-lg font-medium text-gray-700">
+            No Clients Found
+          </h3>
+          <p className="text-sm text-gray-500 mt-1">
+            Add clients to start tracking attendance.
+          </p>
         </div>
       ) : (
         <div className="bg-white shadow-sm rounded-lg border">
           <ul className="divide-y divide-gray-200">
             {clients.map((client) => {
               const record = attendance.get(client.id!);
-              const isPresent = record?.status === 'present';
-              const isAbsent = record?.status === 'absent';
-              
+              const isPresent = record?.status === "present";
+              const isAbsent = record?.status === "absent";
+
               return (
-                <li key={client.id} className="flex items-center justify-between p-4 flex-wrap">
-                  <span className="font-medium text-gray-800">{client.firstName} {client.lastName}</span>
+                <li
+                  key={client.id}
+                  className="flex items-center justify-between p-4 flex-wrap"
+                >
+                  <span className="font-medium text-gray-800">
+                    {client.firstName} {client.lastName}
+                  </span>
                   <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                    <button
+                    <Button
+                      size="sm"
+                      variant={isPresent ? "default" : "outline"}
                       onClick={() => handleToggle(client.id!, true)}
-                      className={`flex items-center justify-center gap-2 w-24 px-3 py-1.5 rounded-md text-sm transition ${
+                      className={`w-24 justify-center ${
                         isPresent
-                          ? "bg-green-500 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-green-200"
+                          ? "bg-green-500 hover:bg-green-600"
+                          : "hover:bg-green-50"
                       }`}
                     >
                       <Check size={16} /> Present
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={isAbsent ? "destructive" : "outline"}
                       onClick={() => handleToggle(client.id!, false)}
-                      className={`flex items-center justify-center gap-2 w-24 px-3 py-1.5 rounded-md text-sm transition ${
+                      className={`w-24 justify-center ${
                         isAbsent
-                          ? "bg-red-500 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-red-200"
+                          ? "bg-red-500 hover:bg-red-600"
+                          : "hover:bg-red-50"
                       }`}
                     >
                       <X size={16} /> Absent
-                    </button>
+                    </Button>
                   </div>
                 </li>
               );

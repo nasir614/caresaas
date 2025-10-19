@@ -1,16 +1,15 @@
-
 // src/lib/firebase/config.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getFirestore,
   initializeFirestore,
-  memoryLocalCache, // disables offline mode for Cloud Workstations
+  memoryLocalCache,
   connectFirestoreEmulator,
 } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getStorage, connectStorageEmulator } from "firebase/storage";
 
-// ✅ Your exact Firebase config from environment variables
+// Your web app's Firebase configuration, using environment variables
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
@@ -20,29 +19,23 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
-// Initialize Firebase safely (prevents “already initialized” errors)
+// Initialize Firebase safely
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// ✅ Firestore with live (no offline) cache
-const db = initializeFirestore(app, {
-  localCache: memoryLocalCache(),
-});
-
-// ✅ Firebase Authentication
+// Initialize services
+const db = getFirestore(app);
 const auth = getAuth(app);
-
-// ✅ Firebase Storage
 const storage = getStorage(app);
 
-// ✅ Automatically switch to emulators when in a dev environment
-if (
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" ||
-    window.location.hostname.includes("cloudworkstations.dev"))
-) {
+// Connect to emulators in development.
+// This block MUST be after the service initializations.
+if (process.env.NODE_ENV === "development") {
   console.log("⚙️ Using Firebase Emulators");
+  // Point Firestore to the local emulator
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  // Point Auth to the local emulator
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
+  // Point Storage to the local emulator
   connectStorageEmulator(storage, "127.0.0.1", 9199);
 }
 

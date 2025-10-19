@@ -4,10 +4,11 @@ import {
   getFirestore,
   collection,
   doc,
-  setDoc,
   writeBatch,
 } from "firebase/firestore";
 
+// IMPORTANT: This configuration is for the script to connect to your LIVE Firebase project.
+// This is necessary because the script runs in a Node.js environment outside the app's dev server.
 const firebaseConfig = {
   apiKey: "AIzaSyA2nfco9xBvpy4G-8FPtz-07MmtI-XdZRY",
   authDomain: "studio-8082800862-2cf3e.firebaseapp.com",
@@ -17,7 +18,7 @@ const firebaseConfig = {
   appId: "1:710900543925:web:c62637b20f1c064cab69fc",
 };
 
-// 🔥 Initialize Firebase
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 

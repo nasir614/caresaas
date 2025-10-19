@@ -10,7 +10,7 @@ const firebaseConfig = {
     projectId: "studio-8082800862-2cf3e",
     storageBucket: "studio-8082800862-2cf3e.appspot.com",
     messagingSenderId: "710900543925",
-    appId: "1:710900543925:web:2b42cccf2e8e5c03ab69fc"
+    appId: "1:710900543925:web:c62637b20f1c064cab69fc"
 };
 
 let app: FirebaseApp;
@@ -31,8 +31,8 @@ db = getFirestore(app);
 storage = getStorage(app);
 
 if (process.env.NODE_ENV === 'development') {
-    //This is a workaround for a bug in the Firebase SDK where it doesn't
-    //handle HMR correctly.
+    // This is a workaround for a bug in the Firebase SDK where it doesn't
+    // handle HMR correctly, so we connect only once.
     // @ts-ignore
     if (!globalThis._firebaseEmulatorsConnected) {
         console.log("Connecting to Firebase Emulators...");
@@ -48,6 +48,5 @@ if (process.env.NODE_ENV === 'development') {
         globalThis._firebaseEmulatorsConnected = true;
     }
 }
-
 
 export { app, auth, db, storage };

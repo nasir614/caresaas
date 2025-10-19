@@ -1,162 +1,158 @@
 "use client";
 
-import { useState } from "react";
-import { Client } from "@/app/(protected)/clients/page";
-import { X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Client, addClient, updateClient } from "@/lib/firebase/clients";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+
+const clientSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+  address: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type ClientFormData = z.infer<typeof clientSchema>;
 
 export default function ClientModal({
   client,
   onClose,
-  onSave,
+  onSaveSuccess,
 }: {
   client: Client | null;
   onClose: () => void;
-  onSave: (data: Client) => Promise<void>;
+  onSaveSuccess: () => void;
 }) {
-  const [form, setForm] = useState<Omit<Client, "id">>(
-    client || {
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(true);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ClientFormData>({
+    resolver: zodResolver(clientSchema),
+    defaultValues: client || {
       firstName: "",
       lastName: "",
       phone: "",
       email: "",
       address: "",
       notes: "",
-    }
-  );
-  const [loading, setLoading] = useState(false);
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    await onSave({ ...client, ...form });
-    setLoading(false);
+  useEffect(() => {
+    reset(
+      client || {
+        firstName: "",
+        lastName: "",
+        phone: "",
+        email: "",
+        address: "",
+        notes: "",
+      }
+    );
+  }, [client, reset]);
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onClose();
+    }
+    setOpen(isOpen);
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const onSubmit = async (data: ClientFormData) => {
+    setLoading(true);
+    try {
+      if (client?.id) {
+        await updateClient(client.id, data);
+      } else {
+        await addClient(data);
+      }
+      onSaveSuccess();
+    } catch (error) {
+      console.error("Failed to save client:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col animate-fade-in">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-semibold text-gray-800">
-            {client ? "Edit Client" : "Add Client"}
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100"
-          >
-            <X size={20} className="text-gray-600" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{client ? "Edit Client" : "Add Client"}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Name *
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                  value={form.firstName}
-                  onChange={handleInputChange}
-                  required
-                />
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input id="firstName" {...register("firstName")} />
+                {errors.firstName && (
+                  <p className="text-red-500 text-sm">{errors.firstName.message}</p>
+                )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Last Name *
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                  value={form.lastName}
-                  onChange={handleInputChange}
-                  required
-                />
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input id="lastName" {...register("lastName")} />
+                {errors.lastName && (
+                  <p className="text-red-500 text-sm">{errors.lastName.message}</p>
+                )}
               </div>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Phone *
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                value={form.phone}
-                onChange={handleInputChange}
-                required
-              />
+              <Label htmlFor="phone">Phone *</Label>
+              <Input id="phone" {...register("phone")} />
+              {errors.phone && (
+                <p className="text-red-500 text-sm">{errors.phone.message}</p>
+              )}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                value={form.email}
-                onChange={handleInputChange}
-              />
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" {...register("email")} />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Address
-              </label>
-              <input
-                type="text"
-                name="address"
-                className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                value={form.address}
-                onChange={handleInputChange}
-              />
+              <Label htmlFor="address">Address</Label>
+              <Input id="address" {...register("address")} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Notes
-              </label>
-              <textarea
-                rows={4}
-                name="notes"
-                className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                value={form.notes}
-                onChange={handleInputChange}
-              />
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea id="notes" {...register("notes")} />
             </div>
           </div>
-
-          <div className="flex justify-end gap-3 p-4 bg-gray-50 border-t">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-white border rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300"
-            >
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button type="submit" disabled={loading}>
               {loading ? "Saving..." : "Save Client"}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

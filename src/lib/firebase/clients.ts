@@ -8,6 +8,7 @@ import {
   doc,
   query,
   Timestamp,
+  writeBatch,
 } from "firebase/firestore";
 
 export interface Client {
@@ -35,23 +36,35 @@ export async function addClient(data: Omit<Client, 'id' | 'userId' | 'createdAt'
   const user = auth.currentUser;
   if (!user) throw new Error("Unauthorized");
   const tenantId = user.uid;
-  await addDoc(collection(db, `tenants/${tenantId}/clients`), { 
+  
+  const batch = writeBatch(db);
+  const docRef = doc(collection(db, `tenants/${tenantId}/clients`));
+  
+  batch.set(docRef, { 
     ...data, 
     userId: user.uid,
     createdAt: Timestamp.now(),
   });
+
+  await batch.commit();
 }
 
 export async function updateClient(id: string, data: Partial<Client>) {
     const user = auth.currentUser;
     if (!user) throw new Error("Unauthorized");
     const tenantId = user.uid;
-    await updateDoc(doc(db, `tenants/${tenantId}/clients`, id), data);
+    const batch = writeBatch(db);
+    const docRef = doc(db, `tenants/${tenantId}/clients`, id);
+    batch.update(docRef, data);
+    await batch.commit();
 }
 
 export async function deleteClient(id: string) {
     const user = auth.currentUser;
     if (!user) throw new Error("Unauthorized");
     const tenantId = user.uid;
-    await deleteDoc(doc(db, `tenants/${tenantId}/clients`, id));
+    const batch = writeBatch(db);
+    const docRef = doc(db, `tenants/${tenantId}/clients`, id);
+    batch.delete(docRef);
+    await batch.commit();
 }

@@ -7,6 +7,7 @@ import {
   deleteDoc,
   doc,
   query,
+  writeBatch,
 } from "firebase/firestore";
 
 export interface Staff {
@@ -31,19 +32,28 @@ export async function addStaff(data: Omit<Staff, 'id'>) {
   const user = auth.currentUser;
   if (!user) throw new Error("Unauthorized");
   const tenantId = user.uid;
-  await addDoc(collection(db, `tenants/${tenantId}/staff`), { ...data, userId: user.uid });
+  const batch = writeBatch(db);
+  const docRef = doc(collection(db, `tenants/${tenantId}/staff`));
+  batch.set(docRef, { ...data, userId: user.uid });
+  await batch.commit();
 }
 
 export async function updateStaff(id: string, data: Partial<Staff>) {
     const user = auth.currentUser;
     if (!user) throw new Error("Unauthorized");
     const tenantId = user.uid;
-    await updateDoc(doc(db, `tenants/${tenantId}/staff`, id), data);
+    const batch = writeBatch(db);
+    const docRef = doc(db, `tenants/${tenantId}/staff`, id);
+    batch.update(docRef, data);
+    await batch.commit();
 }
 
 export async function deleteStaff(id: string) {
     const user = auth.currentUser;
     if (!user) throw new Error("Unauthorized");
     const tenantId = user.uid;
-    await deleteDoc(doc(db, `tenants/${tenantId}/staff`, id));
+    const batch = writeBatch(db);
+    const docRef = doc(db, `tenants/${tenantId}/staff`, id);
+    batch.delete(docRef);
+    await batch.commit();
 }

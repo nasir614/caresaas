@@ -1,33 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  Timestamp,
-  updateDoc,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/lib/firebase/useAuth";
 import { Plus, Pencil, Trash } from "lucide-react";
 import StaffModal from "@/components/forms/StaffModal";
 import { Button } from "@/components/ui/button";
-
-export interface Staff {
-  id?: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email?: string;
-  role: string;
-}
+import { getStaff, deleteStaff, Staff } from "@/lib/firebase/staff";
 
 export default function StaffPage() {
   const { user } = useAuth();
-  const tenantId = user?.uid || "demo-tenant";
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
@@ -40,8 +21,8 @@ export default function StaffPage() {
     }
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, `tenants/${tenantId}/staff`));
-      setStaff(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Staff[]);
+      const staffData = await getStaff();
+      setStaff(staffData);
     } catch (error) {
       console.error("Error fetching staff:", error);
     } finally {
@@ -50,32 +31,30 @@ export default function StaffPage() {
   }
 
   useEffect(() => {
-    fetchStaff();
+    if (user) {
+      fetchStaff();
+    }
   }, [user]);
 
-  const handleSave = async (data: Staff) => {
-    if (!user) return;
-    if (selectedStaff?.id) {
-      await updateDoc(
-        doc(db, `tenants/${tenantId}/staff`, selectedStaff.id),
-        data
-      );
-    } else {
-      await addDoc(collection(db, `tenants/${tenantId}/staff`), {
-        ...data,
-        userId: user.uid,
-      });
-    }
+  const handleModalClose = () => {
     setShowModal(false);
     setSelectedStaff(null);
-    await fetchStaff();
+  };
+
+  const handleSaveSuccess = () => {
+    handleModalClose();
+    fetchStaff(); // Refresh the staff list
   };
 
   const handleDelete = async (id: string) => {
     if (!user) return;
     if (!confirm("Are you sure you want to delete this staff member?")) return;
-    await deleteDoc(doc(db, `tenants/${tenantId}/staff`, id));
-    await fetchStaff();
+    try {
+      await deleteStaff(id);
+      fetchStaff(); // Refresh the staff list
+    } catch (error) {
+      console.error("Error deleting staff member:", error);
+    }
   };
 
   if (loading)
@@ -213,8 +192,8 @@ export default function StaffPage() {
       {showModal && (
         <StaffModal
           staff={selectedStaff}
-          onClose={() => setShowModal(false)}
-          onSave={handleSave}
+          onClose={handleModalClose}
+          onSaveSuccess={handleSaveSuccess}
         />
       )}
     </div>

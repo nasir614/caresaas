@@ -1,150 +1,141 @@
 "use client";
 
-import { useState } from "react";
-import { Staff } from "@/app/(protected)/staff/page";
-import { X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Staff, addStaff, updateStaff } from "@/lib/firebase/staff";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+
+const staffSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  role: z.string().min(1, "Role is required"),
+  phone: z.string().min(1, "Phone number is required"),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
+});
+
+type StaffFormData = z.infer<typeof staffSchema>;
 
 export default function StaffModal({
   staff,
   onClose,
-  onSave,
+  onSaveSuccess,
 }: {
   staff: Staff | null;
   onClose: () => void;
-  onSave: (data: Staff) => Promise<void>;
+  onSaveSuccess: () => void;
 }) {
-  const [form, setForm] = useState<Omit<Staff, "id">>(
-    staff || {
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(true);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<StaffFormData>({
+    resolver: zodResolver(staffSchema),
+    defaultValues: staff || {
       firstName: "",
       lastName: "",
+      role: "",
       phone: "",
       email: "",
-      role: "",
-    }
-  );
-  const [loading, setLoading] = useState(false);
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    await onSave({ ...staff, ...form });
-    setLoading(false);
+  useEffect(() => {
+    reset(
+      staff || {
+        firstName: "",
+        lastName: "",
+        role: "",
+        phone: "",
+        email: "",
+      }
+    );
+  }, [staff, reset]);
+  
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      onClose();
+    }
+    setOpen(isOpen);
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const onSubmit = async (data: StaffFormData) => {
+    setLoading(true);
+    try {
+      if (staff?.id) {
+        await updateStaff(staff.id, data);
+      } else {
+        await addStaff(data);
+      }
+      onSaveSuccess();
+    } catch (error) {
+      console.error("Failed to save staff:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col animate-fade-in">
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-semibold text-gray-800">
-            {staff ? "Edit Staff" : "Add Staff"}
-          </h3>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100"
-          >
-            <X size={20} className="text-gray-600" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Name *
-                </label>
-                <input
-                  type="text"
-                  name="firstName"
-                  className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                  value={form.firstName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Last Name *
-                </label>
-                <input
-                  type="text"
-                  name="lastName"
-                  className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                  value={form.lastName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{staff ? "Edit Staff" : "Add Staff"}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <Label htmlFor="firstName">First Name *</Label>
+                    <Input id="firstName" {...register("firstName")} />
+                    {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName.message}</p>}
+                </div>
+                <div>
+                    <Label htmlFor="lastName">Last Name *</Label>
+                    <Input id="lastName" {...register("lastName")} />
+                    {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName.message}</p>}
+                </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Role *
-              </label>
-              <input
-                type="text"
-                name="role"
-                placeholder="e.g. Caregiver, Administrator"
-                className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                value={form.role}
-                onChange={handleInputChange}
-                required
-              />
+             <div>
+                <Label htmlFor="role">Role *</Label>
+                <Input id="role" {...register("role")} />
+                {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Phone *
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                value={form.phone}
-                onChange={handleInputChange}
-                required
-              />
+                <Label htmlFor="phone">Phone *</Label>
+                <Input id="phone" {...register("phone")} />
+                {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-primary focus:border-primary outline-none"
-                value={form.email}
-                onChange={handleInputChange}
-              />
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" {...register("email")} />
+                {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
             </div>
           </div>
-
-          <div className="flex justify-end gap-3 p-4 bg-gray-50 border-t">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-white border rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300"
-            >
+          <DialogFooter>
+            <DialogClose asChild>
+                <Button type="button" variant="secondary">Cancel</Button>
+            </DialogClose>
+            <Button type="submit" disabled={loading}>
               {loading ? "Saving..." : "Save Staff"}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

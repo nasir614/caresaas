@@ -1,36 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  Timestamp,
-  updateDoc,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/lib/firebase/useAuth";
 import { Plus, Pencil, Trash } from "lucide-react";
 import ClientModal from "@/components/forms/ClientModal";
 import { Button } from "@/components/ui/button";
-
-export interface Client {
-  id?: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email?: string;
-  address?: string;
-  notes?: string;
-  userId?: string;
-  createdAt?: Timestamp;
-}
+import { getClients, deleteClient, Client } from "@/lib/firebase/clients";
 
 export default function ClientsPage() {
   const { user } = useAuth();
-  const tenantId = user?.uid || "demo-tenant";
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -43,10 +21,8 @@ export default function ClientsPage() {
     }
     setLoading(true);
     try {
-      const snap = await getDocs(collection(db, `tenants/${tenantId}/clients`));
-      setClients(
-        snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Client[]
-      );
+      const clientData = await getClients();
+      setClients(clientData);
     } catch (error) {
       console.error("Error fetching clients:", error);
     } finally {
@@ -55,33 +31,30 @@ export default function ClientsPage() {
   }
 
   useEffect(() => {
-    fetchClients();
+    if (user) {
+      fetchClients();
+    }
   }, [user]);
 
-  const handleSave = async (data: Client) => {
-    if (!user) return;
-    if (selectedClient?.id) {
-      await updateDoc(
-        doc(db, `tenants/${tenantId}/clients`, selectedClient.id),
-        data
-      );
-    } else {
-      await addDoc(collection(db, `tenants/${tenantId}/clients`), {
-        ...data,
-        userId: user.uid,
-        createdAt: Timestamp.now(),
-      });
-    }
+  const handleModalClose = () => {
     setShowModal(false);
     setSelectedClient(null);
-    await fetchClients();
+  };
+
+  const handleSaveSuccess = () => {
+    handleModalClose();
+    fetchClients(); // Refresh the client list
   };
 
   const handleDelete = async (id: string) => {
     if (!user) return;
     if (!confirm("Are you sure you want to delete this client?")) return;
-    await deleteDoc(doc(db, `tenants/${tenantId}/clients`, id));
-    await fetchClients();
+    try {
+      await deleteClient(id);
+      fetchClients(); // Refresh the client list
+    } catch (error) {
+      console.error("Error deleting client:", error);
+    }
   };
 
   if (loading)
@@ -214,8 +187,8 @@ export default function ClientsPage() {
       {showModal && (
         <ClientModal
           client={selectedClient}
-          onClose={() => setShowModal(false)}
-          onSave={handleSave}
+          onClose={handleModalClose}
+          onSaveSuccess={handleSaveSuccess}
         />
       )}
     </div>

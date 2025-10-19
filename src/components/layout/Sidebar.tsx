@@ -57,7 +57,7 @@ export default function Sidebar() {
       <aside
         className={`${
           open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transform transition-transform duration-300 w-64 h-screen bg-white border-r shadow-sm fixed md:sticky md:top-0 z-50 flex flex-col`}
+        } md:translate-x-0 transform transition-transform duration-300 w-64 h-screen bg-white border-r shadow-sm fixed md:sticky top-0 z-50 flex flex-col`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">

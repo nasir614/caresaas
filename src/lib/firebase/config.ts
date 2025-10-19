@@ -26,14 +26,19 @@ if (typeof window !== "undefined" && !getApps().length) {
   auth = getAuth(app);
   db = getFirestore(app);
   storage = getStorage(app);
-  
+
   // This is a critical step for development in environments
   // like Firebase Studio / Cloud Workstations, which have restricted
   // outbound network access.
-  console.log("Connecting to Firebase Emulators");
-  connectFirestoreEmulator(db, "127.0.0.1", 8080);
-  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  connectStorageEmulator(storage, "127.0.0.1", 9199);
+  console.log("Attempting to connect to Firebase Emulators...");
+  try {
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    connectStorageEmulator(storage, "127.0.0.1", 9199);
+    console.log("Successfully configured Firebase Emulators.");
+  } catch (e) {
+    console.error("Error connecting to Firebase emulators:", e);
+  }
 
 } else if (getApps().length) {
   app = getApp();

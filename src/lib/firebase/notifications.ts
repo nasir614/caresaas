@@ -10,12 +10,18 @@ import {
   Unsubscribe,
 } from "firebase/firestore";
 
+// A placeholder for a real tenancy solution
+function getTenantId() {
+  return "demo-tenant";
+}
+
 export const getNotifications = (
   userId: string,
   callback: (notifications: any[]) => void
 ): Unsubscribe => {
   const q = query(
-    collection(db, `users/${userId}/notifications`),
+    collection(db, `tenants/${getTenantId()}/notifications`),
+    where("userId", "==", userId),
     orderBy("date", "desc")
   );
 
@@ -29,7 +35,7 @@ export const getNotifications = (
 };
 
 export const markNotificationAsRead = async (userId: string, notificationId: string) => {
-  const notifRef = doc(db, `users/${userId}/notifications`, notificationId);
+  const notifRef = doc(db, `tenants/${getTenantId()}/notifications`, notificationId);
   await updateDoc(notifRef, {
     read: true,
   });

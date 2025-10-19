@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash, DollarSign } from "lucide-react";
+import { getCollection } from "@/lib/firebase/firestore";
 
-// Mock data and functions - replace with Firebase integration
 interface Bill {
   id: string;
   clientName: string;
@@ -12,18 +12,6 @@ interface Bill {
   dueDate: string;
 }
 
-const getBills = async (): Promise<Bill[]> => {
-  // Replace with actual Firebase call
-  return Promise.resolve([
-    { id: '1', clientName: 'Jane Smith', amount: 350.00, status: 'Paid', dueDate: '2024-07-15' },
-    { id: '2', clientName: 'Bob Johnson', amount: 420.50, status: 'Pending', dueDate: '2024-08-01' },
-    { id: '3', clientName: 'Alice Williams', amount: 280.00, status: 'Overdue', dueDate: '2024-07-01' },
-    { id: '4', clientName: 'Charlie Brown', amount: 350.00, status: 'Pending', dueDate: '2024-08-01' },
-  ]);
-};
-
-// End of mock data
-
 export default function BillingPage() {
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +19,7 @@ export default function BillingPage() {
   const loadBills = async () => {
     setLoading(true);
     try {
-      const data = await getBills();
+      const data = await getCollection<Bill>('billing');
       setBills(data);
     } catch (error) {
       console.error("Failed to load bills:", error);

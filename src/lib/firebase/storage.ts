@@ -1,8 +1,13 @@
 import { getDownloadURL, ref, uploadBytes, uploadBytesResumable } from "firebase/storage";
 import { storage } from "./config";
 
+// A placeholder for a real tenancy solution
+function getTenantId() {
+  return "demo-tenant";
+}
+
 export async function uploadProfileImage(file: File, userId: string) {
-  const fileRef = ref(storage, `profileImages/${userId}.jpg`);
+  const fileRef = ref(storage, `tenants/${getTenantId()}/profileImages/${userId}.jpg`);
   await uploadBytes(fileRef, file);
   const url = await getDownloadURL(fileRef);
   return url;
@@ -16,7 +21,7 @@ export function uploadFile(
     onProgress: (progress: number) => void
   ): Promise<{ downloadURL: string; filePath: string }> {
     return new Promise((resolve, reject) => {
-      const storageRef = ref(storage, path);
+      const storageRef = ref(storage, `tenants/${getTenantId()}/${path}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
   
       uploadTask.on(

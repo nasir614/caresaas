@@ -2,28 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash, FileText } from "lucide-react";
+import { getCollection } from "@/lib/firebase/firestore";
 
-// Mock data and functions - replace with Firebase integration
 interface ComplianceDocument {
   id: string;
-  title: string;
-  type: string;
-  status: 'Active' | 'Expiring Soon' | 'Expired';
+  documentName: string;
+  assignedTo: string;
   expiryDate: string;
-  assignee: string; // Could be client or staff ID
+  status: 'Active' | 'Expiring Soon' | 'Expired';
 }
-
-const getComplianceDocuments = async (): Promise<ComplianceDocument[]> => {
-  // Replace with actual Firebase call
-  return Promise.resolve([
-    { id: '1', title: 'Driver\'s License - John Doe', type: 'Staff Credential', status: 'Active', expiryDate: '2025-10-15', assignee: 'staff-1' },
-    { id: '2', title: 'Medical Clearance - Jane Smith', type: 'Client Document', status: 'Active', expiryDate: '2025-08-22', assignee: 'client-1' },
-    { id: '3', title: 'CPR Certification - Mike Johnson', type: 'Staff Credential', status: 'Expiring Soon', expiryDate: '2024-08-10', assignee: 'staff-2' },
-    { id: '4', title: 'Facility Safety Inspection', type: 'Organizational', status: 'Expired', expiryDate: '2024-06-30', assignee: 'org' },
-  ]);
-};
-
-// End of mock data
 
 export default function CompliancePage() {
   const [documents, setDocuments] = useState<ComplianceDocument[]>([]);
@@ -32,7 +19,7 @@ export default function CompliancePage() {
   const loadDocuments = async () => {
     setLoading(true);
     try {
-      const data = await getComplianceDocuments();
+      const data = await getCollection<ComplianceDocument>('compliance');
       setDocuments(data);
     } catch (error) {
       console.error("Failed to load documents:", error);
@@ -82,7 +69,7 @@ export default function CompliancePage() {
             <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
               <tr>
                 <th className="px-6 py-3">Document Title</th>
-                <th className="px-6 py-3">Type</th>
+                <th className="px-6 py-3">Assigned To</th>
                 <th className="px-6 py-3">Status</th>
                 <th className="px-6 py-3">Expiry Date</th>
                 <th className="px-6 py-3 text-right">Actions</th>
@@ -91,8 +78,8 @@ export default function CompliancePage() {
             <tbody className="divide-y divide-gray-200">
               {documents.map((doc) => (
                 <tr key={doc.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 font-medium text-gray-900">{doc.title}</td>
-                  <td className="px-6 py-4 text-gray-600">{doc.type}</td>
+                  <td className="px-6 py-4 font-medium text-gray-900">{doc.documentName}</td>
+                  <td className="px-6 py-4 text-gray-600">{doc.assignedTo}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(doc.status)}`}>
                       {doc.status}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Client } from "@/lib/firebase/clients";
+import { Client } from "@/app/(protected)/clients/page";
 import { X } from "lucide-react";
 
 export default function ClientModal({
@@ -13,7 +13,7 @@ export default function ClientModal({
   onClose: () => void;
   onSave: (data: Client) => Promise<void>;
 }) {
-  const [form, setForm] = useState<Client>(
+  const [form, setForm] = useState<Omit<Client, "id">>(
     client || {
       firstName: "",
       lastName: "",
@@ -28,13 +28,15 @@ export default function ClientModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await onSave(form);
+    await onSave({ ...client, ...form });
     setLoading(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setForm(prev => ({...prev, [name]: value}));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -44,7 +46,10 @@ export default function ClientModal({
           <h3 className="text-lg font-semibold text-gray-800">
             {client ? "Edit Client" : "Add Client"}
           </h3>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-100"
+          >
             <X size={20} className="text-gray-600" />
           </button>
         </div>
@@ -53,7 +58,9 @@ export default function ClientModal({
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">First Name *</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  First Name *
+                </label>
                 <input
                   type="text"
                   name="firstName"
@@ -64,7 +71,9 @@ export default function ClientModal({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name *</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Last Name *
+                </label>
                 <input
                   type="text"
                   name="lastName"
@@ -75,9 +84,11 @@ export default function ClientModal({
                 />
               </div>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700">Phone *</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Phone *
+              </label>
               <input
                 type="tel"
                 name="phone"
@@ -87,9 +98,11 @@ export default function ClientModal({
                 required
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
@@ -100,7 +113,9 @@ export default function ClientModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Address</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Address
+              </label>
               <input
                 type="text"
                 name="address"
@@ -111,7 +126,9 @@ export default function ClientModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Notes</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Notes
+              </label>
               <textarea
                 rows={4}
                 name="notes"
@@ -121,7 +138,7 @@ export default function ClientModal({
               />
             </div>
           </div>
-          
+
           <div className="flex justify-end gap-3 p-4 bg-gray-50 border-t">
             <button
               type="button"

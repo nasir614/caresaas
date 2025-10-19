@@ -11,6 +11,11 @@ import {
   setDoc,
 } from "firebase/firestore";
 
+// A placeholder for a real tenancy solution
+function getTenantId() {
+  return "demo-tenant";
+}
+
 export interface AttendanceRecord {
   id?: string;
   clientId: string;
@@ -24,8 +29,8 @@ export async function getAttendanceByDate(date: string): Promise<AttendanceRecor
   const user = auth.currentUser;
   if (!user) return [];
   
-  const attendanceRef = collection(db, "attendance");
-  const q = query(attendanceRef, where("userId", "==", user.uid), where("date", "==", date));
+  const attendanceRef = collection(db, `tenants/${getTenantId()}/attendance`);
+  const q = query(attendanceRef, where("date", "==", date));
   
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as AttendanceRecord[];
@@ -36,9 +41,10 @@ export async function addAttendance(data: Omit<AttendanceRecord, 'id' | 'userId'
   const user = auth.currentUser;
   if (!user) throw new Error("Unauthorized");
 
-  // Create a composite ID to ensure one record per client per day
+  const attendanceCollection = collection(db, `tenants/${getTenantId()}/attendance`);
+  // Create a composite ID to ensure one record per client per day for this tenant
   const recordId = `${data.date}_${data.clientId}`;
-  const docRef = doc(db, "attendance", recordId);
+  const docRef = doc(attendanceCollection, recordId);
 
   await setDoc(docRef, { ...data, userId: user.uid }, { merge: true });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Staff } from "@/lib/firebase/staff";
+import { Staff } from "@/app/(protected)/staff/page";
 import { X } from "lucide-react";
 
 export default function StaffModal({
@@ -13,7 +13,7 @@ export default function StaffModal({
   onClose: () => void;
   onSave: (data: Staff) => Promise<void>;
 }) {
-  const [form, setForm] = useState<Staff>(
+  const [form, setForm] = useState<Omit<Staff, "id">>(
     staff || {
       firstName: "",
       lastName: "",
@@ -27,13 +27,15 @@ export default function StaffModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await onSave(form);
+    await onSave({ ...staff, ...form });
     setLoading(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setForm(prev => ({...prev, [name]: value}));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -43,7 +45,10 @@ export default function StaffModal({
           <h3 className="text-lg font-semibold text-gray-800">
             {staff ? "Edit Staff" : "Add Staff"}
           </h3>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-100"
+          >
             <X size={20} className="text-gray-600" />
           </button>
         </div>
@@ -52,7 +57,9 @@ export default function StaffModal({
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">First Name *</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  First Name *
+                </label>
                 <input
                   type="text"
                   name="firstName"
@@ -63,7 +70,9 @@ export default function StaffModal({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Last Name *</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  Last Name *
+                </label>
                 <input
                   type="text"
                   name="lastName"
@@ -74,9 +83,11 @@ export default function StaffModal({
                 />
               </div>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700">Role *</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Role *
+              </label>
               <input
                 type="text"
                 name="role"
@@ -89,7 +100,9 @@ export default function StaffModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Phone *</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Phone *
+              </label>
               <input
                 type="tel"
                 name="phone"
@@ -99,9 +112,11 @@ export default function StaffModal({
                 required
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
@@ -111,7 +126,7 @@ export default function StaffModal({
               />
             </div>
           </div>
-          
+
           <div className="flex justify-end gap-3 p-4 bg-gray-50 border-t">
             <button
               type="button"

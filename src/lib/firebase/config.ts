@@ -18,10 +18,12 @@ let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
+if (typeof window === 'undefined') {
+  // Server-side initialization
+  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 } else {
-  app = getApp();
+  // Client-side initialization
+  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 }
 
 auth = getAuth(app);

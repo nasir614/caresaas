@@ -20,13 +20,13 @@ const featureItems = [
   },
   {
     icon: ShieldCheck,
-    title: "AI Compliance Tools",
-    description: "Automate credential tracking and stay ahead of compliance requirements effortlessly.",
+    title: "Compliance Tools",
+    description: "Track credential and stay ahead of compliance requirements effortlessly.",
   },
   {
     icon: CreditCard,
     title: "Seamless Billing",
-    description: "Integrate with Stripe for easy subscription and payment management.",
+    description: "Manage subscriptions and payments easily.",
   },
 ];
 

@@ -6,7 +6,6 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { KpiCard } from "@/components/ui/kpi-card";
-import ComplianceChecker from "@/components/dashboard/compliance-checker";
 
 const kpiData = [
   {
@@ -57,10 +56,6 @@ export default function DashboardPage() {
             trendColor={kpi.trendColor}
           />
         ))}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-1">
-        <ComplianceChecker />
       </div>
     </div>
   );

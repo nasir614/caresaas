@@ -19,7 +19,7 @@ export default function RegisterPage() {
           </div>
           <CardTitle className="text-2xl">Create your Organization</CardTitle>
           <CardDescription>
-            Start your 14-day free trial. No credit card required for the trial period.
+            Start your 14-day free trial.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -52,31 +52,8 @@ export default function RegisterPage() {
               <Input id="password" type="password" />
             </div>
             
-            <div className="grid gap-2">
-                <Label>Select a Plan</Label>
-                <RadioGroup defaultValue="monthly" className="grid grid-cols-2 gap-4">
-                    <div>
-                        <RadioGroupItem value="monthly" id="monthly" className="peer sr-only" />
-                        <Label htmlFor="monthly" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                            <span className="font-semibold">Monthly</span>
-                            <span className="text-2xl font-bold">$49</span>
-                            <span className="text-xs text-muted-foreground">per month</span>
-                        </Label>
-                    </div>
-                    <div>
-                        <RadioGroupItem value="annual" id="annual" className="peer sr-only" />
-                        <Label htmlFor="annual" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                             <span className="font-semibold">Annual</span>
-                            <span className="text-2xl font-bold">$499</span>
-                            <span className="text-xs text-muted-foreground">per year</span>
-                        </Label>
-                    </div>
-                </RadioGroup>
-            </div>
-
-
             <Button type="submit" className="w-full" asChild>
-                <Link href="/dashboard">Proceed to Checkout</Link>
+                <Link href="/dashboard">Create Account</Link>
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">

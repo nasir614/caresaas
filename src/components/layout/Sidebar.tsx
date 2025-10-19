@@ -1,13 +1,17 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserCog, CreditCard } from "lucide-react";
+import { LayoutDashboard, Users, UserCog, CheckSquare, Truck, ShieldCheck, CreditCard, BarChart3 } from "lucide-react";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/clients", label: "Clients", icon: Users },
   { href: "/staff", label: "Staff", icon: UserCog },
+  { href: "/attendance", label: "Attendance", icon: CheckSquare },
+  { href: "/transportation", label: "Transportation", icon: Truck },
+  { href: "/compliance", label: "Compliance", icon: ShieldCheck },
   { href: "/billing", label: "Billing", icon: CreditCard },
+  { href: "/reports", label: "Reports", icon: BarChart3 },
 ];
 
 export default function Sidebar() {

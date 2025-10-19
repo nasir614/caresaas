@@ -1,7 +1,16 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, UserCog, CheckSquare, Truck, ShieldCheck, CreditCard, BarChart3 } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  UserCog,
+  CheckSquare,
+  Truck,
+  ShieldCheck,
+  CreditCard,
+  BarChart3,
+} from "lucide-react";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -18,7 +27,7 @@ export default function Sidebar() {
   const path = usePathname();
 
   return (
-    <aside className="fixed md:static md:flex flex-col w-64 h-screen bg-white border-r shadow-sm z-30">
+    <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 border-r bg-white shadow-sm md:flex flex-col">
       <div className="px-6 py-4 text-xl font-bold text-primary border-b">
         CareCloud SaaS
       </div>
@@ -30,9 +39,11 @@ export default function Sidebar() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition
-                ${active ? "bg-primary/10 text-primary" : "text-gray-700 hover:bg-primary/5"}
-              `}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                active
+                  ? "bg-primary/10 text-primary"
+                  : "text-gray-700 hover:bg-primary/5"
+              }`}
             >
               <Icon size={18} />
               {label}

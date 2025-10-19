@@ -5,7 +5,6 @@ import { getAuth, connectAuthEmulator, type Auth } from "firebase/auth";
 import { getStorage, connectStorageEmulator, type FirebaseStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration, using environment variables.
-// These are sourced from .env.local during local development.
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -20,32 +19,41 @@ let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 
-// Initialize Firebase safely for client-side rendering
-if (typeof window !== "undefined" && !getApps().length) {
+if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
+} else {
+  app = getApp();
+}
 
-  // This is a critical step for development in environments
-  // like Firebase Studio / Cloud Workstations, which have restricted
-  // outbound network access.
-  console.log("Attempting to connect to Firebase Emulators...");
+auth = getAuth(app);
+db = getFirestore(app);
+storage = getStorage(app);
+
+// Connect to emulators in development
+if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+  console.log("Connecting to Firebase Emulators...");
   try {
     connectFirestoreEmulator(db, "127.0.0.1", 8080);
     connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
     connectStorageEmulator(storage, "127.0.0.1", 9199);
-    console.log("Successfully configured Firebase Emulators.");
+    console.log("Successfully connected to Firebase Emulators.");
   } catch (e) {
     console.error("Error connecting to Firebase emulators:", e);
   }
-
-} else if (getApps().length) {
-  app = getApp();
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
+} else if (process.env.NODE_ENV === 'development' && !globalThis._firebaseEmulatorsConnected) {
+  // This check is for the server-side part in a dev environment
+  console.log("Connecting to Firebase Emulators (Server)...");
+   try {
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    connectStorageEmulator(storage, "127.0.0.1", 9199);
+    console.log("Successfully connected to Firebase Emulators (Server).");
+    // @ts-ignore
+    globalThis._firebaseEmulatorsConnected = true;
+  } catch (e) {
+    console.error("Error connecting to Firebase emulators (Server):", e);
+  }
 }
 
-// @ts-ignore
+
 export { app, auth, db, storage };

@@ -1,4 +1,3 @@
-
 // src/lib/firebase/config.ts
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getFirestore, connectFirestoreEmulator, type Firestore } from "firebase/firestore";
@@ -19,40 +18,34 @@ let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 
-// Singleton pattern to initialize Firebase app only once
-if (!getApps().length) {
+// This ensures we initialize on the client-side only, but the instances
+// are created and exported for server-side use as well.
+if (typeof window !== "undefined" && !getApps().length) {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
 
-    // Connect to emulators in development.
-    // The `process.env.NODE_ENV` check ensures this only runs in dev,
-    // and the `!auth.emulatorConfig` check prevents reconnecting on hot reloads.
-    if (process.env.NODE_ENV === 'development') {
-        console.log("Connecting to Firebase Emulators...");
-        try {
-            // Check if not already connected
-            if (!auth.emulatorConfig) {
-                connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-            }
-            if (!(db.toJSON() as any).settings.host) {
-                 connectFirestoreEmulator(db, "127.0.0.1", 8080);
-            }
-            if (!(storage as any).emulator) {
-                connectStorageEmulator(storage, "127.0.0.1", 9199);
-            }
-            console.log("Successfully connected to Firebase Emulators.");
-        } catch (e) {
-            console.error("Error connecting to Firebase emulators:", e);
-        }
-    }
-} else {
+    // Force connection to emulators in the development environment
+    // This is the most reliable way to avoid network issues in Cloud Workstations
+    console.log("Connecting to Firebase Emulators...");
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+    connectFirestoreEmulator(db, "127.0.0.1", 8080);
+    connectStorageEmulator(storage, "127.0.0.1", 9199);
+    console.log("Successfully connected to Firebase Emulators.");
+} else if (getApps().length) {
     // If the app is already initialized, get the existing instances
     app = getApp();
     auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
+} else {
+    // For server-side rendering, initialize a new app
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
 }
+
 
 export { app, auth, db, storage };

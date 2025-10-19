@@ -15,14 +15,15 @@ export interface Organization {
 }
 
 export interface User {
-  id: string;
-  tenantId: string;
-  organizationId: string;
+  id: string; // This will be the Firebase Auth UID
+  tenantId?: string;
+  organizationId?: string;
   email: string;
   firstName: string;
   lastName: string;
   role: Role;
   assignedClientIds?: string[];
+  createdAt: any; // Firestore Timestamp
 }
 
 export interface Client {

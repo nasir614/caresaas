@@ -30,9 +30,14 @@ export default function BillingPage() {
 
   const loadBills = async () => {
     setLoading(true);
-    const data = await getBills();
-    setBills(data);
-    setLoading(false);
+    try {
+      const data = await getBills();
+      setBills(data);
+    } catch (error) {
+      console.error("Failed to load bills:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

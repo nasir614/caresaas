@@ -19,9 +19,15 @@ export default function StaffPage() {
 
   const loadStaff = async () => {
     setLoading(true);
-    const data = await getStaff();
-    setStaff(data);
-    setLoading(false);
+    try {
+      const data = await getStaff();
+      setStaff(data);
+    } catch (error) {
+      console.error("Failed to load staff:", error);
+      // Optionally set an error state here to show in the UI
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

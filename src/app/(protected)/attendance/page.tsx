@@ -13,17 +13,21 @@ export default function AttendancePage() {
 
   const loadData = async (date: string) => {
     setLoading(true);
-    const clientData = await getClients();
-    setClients(clientData);
-    
-    const attendanceData = await getAttendanceByDate(date);
-    const attendanceMap = new Map<string, AttendanceRecord>();
-    attendanceData.forEach(record => {
-      if(record.clientId) attendanceMap.set(record.clientId, record);
-    });
-    setAttendance(attendanceMap);
-    
-    setLoading(false);
+    try {
+      const clientData = await getClients();
+      setClients(clientData);
+      
+      const attendanceData = await getAttendanceByDate(date);
+      const attendanceMap = new Map<string, AttendanceRecord>();
+      attendanceData.forEach(record => {
+        if(record.clientId) attendanceMap.set(record.clientId, record);
+      });
+      setAttendance(attendanceMap);
+    } catch (error) {
+      console.error("Failed to load attendance data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

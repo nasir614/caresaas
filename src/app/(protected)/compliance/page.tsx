@@ -31,9 +31,14 @@ export default function CompliancePage() {
 
   const loadDocuments = async () => {
     setLoading(true);
-    const data = await getComplianceDocuments();
-    setDocuments(data);
-    setLoading(false);
+    try {
+      const data = await getComplianceDocuments();
+      setDocuments(data);
+    } catch (error) {
+      console.error("Failed to load documents:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

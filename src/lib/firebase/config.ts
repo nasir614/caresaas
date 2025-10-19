@@ -1,28 +1,35 @@
-"use client";
+// src/lib/firebase/config.ts
+import { initializeApp, getApps, getApp } from "firebase/app";
+import {
+  getFirestore,
+  initializeFirestore,
+  memoryLocalCache, // disables offline mode for Cloud Workstations
+} from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
-import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { getStorage, FirebaseStorage } from "firebase/storage";
-
+// ✅ Your exact Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyA2nfco9xBvpy4G-8FPtz-07MmtI-XdZRY",
-  authDomain: "studio-8082800862-2cf3e.firebaseapp.com",
-  projectId: "studio-8082800862-2cf3e",
-  storageBucket: "studio-8082800862-2cf3e.appspot.com",
-  messagingSenderId: "710900543925",
-  appId: "1:710900543925:web:f9f51a24b3d452d8ab69fc",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
-let app: FirebaseApp;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
-}
+// Initialize Firebase safely (prevents “already initialized” errors)
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-const auth: Auth = getAuth(app);
-const db: Firestore = getFirestore(app);
-const storage: FirebaseStorage = getStorage(app);
+// ✅ Firestore with live (no offline) cache
+const db = initializeFirestore(app, {
+  localCache: memoryLocalCache(),
+});
+
+// ✅ Firebase Authentication
+const auth = getAuth(app);
+
+// ✅ Firebase Storage
+const storage = getStorage(app);
 
 export { app, auth, db, storage };

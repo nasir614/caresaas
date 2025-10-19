@@ -1,61 +1,28 @@
-import {
-  Activity,
-  CalendarCheck,
-  TrendingUp,
-  Users,
-  ShieldAlert,
-} from "lucide-react";
-import { KpiCard } from "@/components/ui/kpi-card";
-
-const kpiData = [
-  {
-    title: "Total Clients",
-    value: "125",
-    trend: "+5.2% month-over-month",
-    icon: <Users className="h-6 w-6 text-muted-foreground" />,
-    trendIcon: <TrendingUp className="h-4 w-4" />,
-  },
-  {
-    title: "Attendance Today",
-    value: "82",
-    trend: "91% of expected",
-    icon: <Activity className="h-6 w-6 text-muted-foreground" />,
-  },
-  {
-    title: "Compliance Alerts",
-    value: "3",
-    trend: "2 credentials expiring soon",
-    icon: <ShieldAlert className="h-6 w-6 text-muted-foreground" />,
-    trendColor: "text-amber-600",
-  },
-  {
-    title: "Upcoming Care Plans",
-    value: "7",
-    trend: "Due next 7 days",
-    icon: <CalendarCheck className="h-6 w-6 text-muted-foreground" />,
-  },
-];
-
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold font-headline tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Here's a snapshot of your organization's activity.</p>
-      </div>
+    <div className="space-y-4">
+      <h2 className="text-2xl font-semibold">Dashboard</h2>
+      <p className="text-gray-600">
+        Here’s a snapshot of your organization’s activity.
+      </p>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpiData.map((kpi, index) => (
-          <KpiCard
-            key={index}
-            title={kpi.title}
-            value={kpi.value}
-            trend={kpi.trend}
-            icon={kpi.icon}
-            trendIcon={kpi.trendIcon}
-            trendColor={kpi.trendColor}
-          />
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div className="p-5 bg-white shadow-sm rounded-lg border">
+          <h3 className="text-sm font-semibold text-gray-700">Total Clients</h3>
+          <p className="text-2xl font-bold text-primary mt-1">125</p>
+        </div>
+        <div className="p-5 bg-white shadow-sm rounded-lg border">
+          <h3 className="text-sm font-semibold text-gray-700">
+            Attendance Today
+          </h3>
+          <p className="text-2xl font-bold text-primary mt-1">82</p>
+        </div>
+        <div className="p-5 bg-white shadow-sm rounded-lg border">
+          <h3 className="text-sm font-semibold text-gray-700">
+            Compliance Alerts
+          </h3>
+          <p className="text-2xl font-bold text-red-600 mt-1">3</p>
+        </div>
       </div>
     </div>
   );

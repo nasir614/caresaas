@@ -1,20 +1,20 @@
-// This file will contain Firebase Authentication helper functions.
+import { auth } from "./config";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 
-// Example function to sign in a user (to be implemented)
-export async function signInWithEmail(email: string, password: string) {
-  // Logic to sign in with Firebase Auth
-  console.log("Signing in with:", email, password);
-  return { uid: "mock-user-id" };
-}
+export const registerUser = async (email: string, password: string) => {
+  const res = await createUserWithEmailAndPassword(auth, email, password);
+  return res.user;
+};
 
-// Example function to sign out a user (to be implemented)
-export async function signOut() {
-  // Logic to sign out with Firebase Auth
-  console.log("Signing out");
-}
+export const loginUser = async (email: string, password: string) => {
+  const res = await signInWithEmailAndPassword(auth, email, password);
+  return res.user;
+};
 
-// Example function to set custom claims for a user (to be implemented on the backend)
-export async function setCustomUserClaims(uid: string, claims: object) {
-  // This would typically be an admin SDK function called from a secure backend (e.g., Firebase Function)
-  console.log(`Setting claims for ${uid}:`, claims);
-}
+export const logoutUser = async () => {
+  await signOut(auth);
+};

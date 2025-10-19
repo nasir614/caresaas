@@ -17,7 +17,11 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   }, [user, loading, router]);
 
   if (loading || !user) {
-    return <p className="text-center mt-10">Checking authentication...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <p className="text-center text-gray-500">Checking authentication...</p>
+      </div>
+    );
   }
 
   return (
@@ -25,7 +29,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       <Sidebar />
       <div className="flex flex-1 flex-col">
         <Header />
-        <main className="flex-1 overflow-y-auto p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );

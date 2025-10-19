@@ -8,9 +8,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 font-headline">Welcome back!</h1>
         <p className="text-gray-600 mt-1">
-          Welcome back, {user?.email}! Here's a snapshot of your organization.
+          Here&apos;s a snapshot of your organization.
         </p>
       </div>
 

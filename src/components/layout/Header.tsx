@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useProfile } from "@/lib/firebase/useProfile";
 import { logoutUser } from "@/lib/firebase/auth";
 import Image from "next/image";
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { ChevronDown, LogOut, User, Menu } from "lucide-react";
 
 export default function Header() {
   const { profile } = useProfile();
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -18,7 +19,12 @@ export default function Header() {
     router.push("/auth/login");
   };
 
-  // Click outside to close dropdown
+  const getPageTitle = () => {
+    const path = pathname.split("/").pop() || "dashboard";
+    if (path === 'profile') return 'User Profile';
+    return path.charAt(0).toUpperCase() + path.slice(1);
+  };
+
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -30,8 +36,10 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="flex items-center justify-between h-14 px-6 bg-white border-b shadow-sm sticky top-0 z-30">
-      <h1 className="text-lg font-semibold text-gray-800">Dashboard</h1>
+    <header className="flex items-center justify-between h-16 px-4 sm:px-6 bg-white border-b shadow-sm sticky top-0 z-30">
+      <div className="flex items-center gap-4">
+        <h1 className="text-lg font-semibold text-gray-800 font-headline hidden sm:block">{getPageTitle()}</h1>
+      </div>
 
       <div className="relative" ref={ref}>
         <button
@@ -51,6 +59,7 @@ export default function Header() {
               {profile?.email?.[0]?.toUpperCase() ?? "U"}
             </div>
           )}
+          <span className="hidden sm:block text-sm font-medium text-gray-700">{profile?.email}</span>
           <ChevronDown size={16} className="text-gray-600" />
         </button>
 
@@ -61,7 +70,7 @@ export default function Header() {
                 router.push("/profile");
                 setOpen(false);
               }}
-              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2"
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
             >
               <User size={16} /> Profile
             </button>

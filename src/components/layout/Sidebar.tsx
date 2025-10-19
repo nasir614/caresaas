@@ -14,6 +14,7 @@ import {
   BarChart3,
   Menu,
   X,
+  Building,
 } from "lucide-react";
 
 const links = [
@@ -34,15 +35,14 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* 🟦 Mobile toggle button */}
       <button
         onClick={() => setOpen(true)}
         className="fixed top-4 left-4 z-40 p-2 rounded-md bg-primary text-white md:hidden"
+        aria-label="Open sidebar"
       >
         <Menu size={20} />
       </button>
 
-      {/* 🌙 Sidebar overlay (mobile background blur) */}
       {open && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
@@ -50,26 +50,27 @@ export default function Sidebar() {
         />
       )}
 
-      {/* 🧱 Sidebar itself */}
       <aside
         className={`fixed md:static flex flex-col w-64 h-screen bg-white border-r shadow-sm transform transition-transform duration-300 z-50
           ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <div className="text-xl font-bold text-primary">CareCloud</div>
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <Building className="text-primary" size={24}/>
+            <div className="text-xl font-bold text-primary font-headline">CareCloud</div>
+          </Link>
           <button
             onClick={() => setOpen(false)}
-            className="p-2 rounded-md text-gray-500 hover:text-primary md:hidden"
+            className="p-1 rounded-md text-gray-500 hover:text-primary md:hidden"
+            aria-label="Close sidebar"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Navigation Links */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {links.map(({ href, label, icon: Icon }) => {
-            const active = adjustedPath.startsWith(href);
+            const active = adjustedPath === href;
             return (
               <Link
                 key={href}
@@ -89,7 +90,6 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Footer */}
         <div className="px-4 py-3 border-t text-xs text-gray-500">
           © {new Date().getFullYear()} CareCloud
         </div>

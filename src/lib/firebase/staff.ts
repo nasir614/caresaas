@@ -7,13 +7,7 @@ import {
   deleteDoc,
   doc,
   query,
-  where,
 } from "firebase/firestore";
-
-// A placeholder for a real tenancy solution
-function getTenantId() {
-  return "demo-tenant";
-}
 
 export interface Staff {
   id?: string;
@@ -27,21 +21,29 @@ export interface Staff {
 export async function getStaff(): Promise<Staff[]> {
   const user = auth.currentUser;
   if (!user) return [];
-  const q = query(collection(db, `tenants/${getTenantId()}/staff`));
+  const tenantId = user.uid;
+  const q = query(collection(db, `tenants/${tenantId}/staff`));
   const snapshot = await getDocs(q);
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Staff[];
 }
 
-export async function addStaff(data: Staff) {
+export async function addStaff(data: Omit<Staff, 'id'>) {
   const user = auth.currentUser;
   if (!user) throw new Error("Unauthorized");
-  await addDoc(collection(db, `tenants/${getTenantId()}/staff`), { ...data, userId: user.uid });
+  const tenantId = user.uid;
+  await addDoc(collection(db, `tenants/${tenantId}/staff`), { ...data, userId: user.uid });
 }
 
 export async function updateStaff(id: string, data: Partial<Staff>) {
-  await updateDoc(doc(db, `tenants/${getTenantId()}/staff`, id), data);
+    const user = auth.currentUser;
+    if (!user) throw new Error("Unauthorized");
+    const tenantId = user.uid;
+    await updateDoc(doc(db, `tenants/${tenantId}/staff`, id), data);
 }
 
 export async function deleteStaff(id: string) {
-  await deleteDoc(doc(db, `tenants/${getTenantId()}/staff`, id));
+    const user = auth.currentUser;
+    if (!user) throw new Error("Unauthorized");
+    const tenantId = user.uid;
+    await deleteDoc(doc(db, `tenants/${tenantId}/staff`, id));
 }

@@ -1,20 +1,12 @@
 import { db, auth } from "./config";
 import {
   collection,
-  addDoc,
   getDocs,
-  updateDoc,
   query,
   where,
-  Timestamp,
   doc,
   setDoc,
 } from "firebase/firestore";
-
-// A placeholder for a real tenancy solution
-function getTenantId() {
-  return "demo-tenant";
-}
 
 export interface AttendanceRecord {
   id?: string;
@@ -22,14 +14,16 @@ export interface AttendanceRecord {
   date: string; // YYYY-MM-DD
   status: 'present' | 'absent' | 'unchecked';
   userId?: string;
+  tenantId: string;
 }
 
 // Get all attendance for a specific date
 export async function getAttendanceByDate(date: string): Promise<AttendanceRecord[]> {
   const user = auth.currentUser;
   if (!user) return [];
+  const tenantId = user.uid; // Use user's UID as tenant ID
   
-  const attendanceRef = collection(db, `tenants/${getTenantId()}/attendance`);
+  const attendanceRef = collection(db, `tenants/${tenantId}/attendance`);
   const q = query(attendanceRef, where("date", "==", date));
   
   const snapshot = await getDocs(q);
@@ -40,8 +34,10 @@ export async function getAttendanceByDate(date: string): Promise<AttendanceRecor
 export async function addAttendance(data: Omit<AttendanceRecord, 'id' | 'userId'>) {
   const user = auth.currentUser;
   if (!user) throw new Error("Unauthorized");
+  if(user.uid !== data.tenantId) throw new Error("Unauthorized: Tenant ID mismatch");
 
-  const attendanceCollection = collection(db, `tenants/${getTenantId()}/attendance`);
+
+  const attendanceCollection = collection(db, `tenants/${data.tenantId}/attendance`);
   // Create a composite ID to ensure one record per client per day for this tenant
   const recordId = `${data.date}_${data.clientId}`;
   const docRef = doc(attendanceCollection, recordId);

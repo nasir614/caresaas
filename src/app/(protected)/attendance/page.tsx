@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/firebase/useAuth";
 import {
   getAttendanceByDate,
   addAttendance,
@@ -11,6 +12,9 @@ import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function AttendancePage() {
+  const { user } = useAuth();
+  const tenantId = user?.uid || "demo-tenant";
+
   const [clients, setClients] = useState<Client[]>([]);
   const [attendance, setAttendance] = useState<Map<string, AttendanceRecord>>(
     new Map()
@@ -21,6 +25,7 @@ export default function AttendancePage() {
   );
 
   const loadData = async (date: string) => {
+    if (!user) return;
     setLoading(true);
     try {
       const clientData = await getClients();
@@ -40,14 +45,18 @@ export default function AttendancePage() {
   };
 
   useEffect(() => {
-    loadData(selectedDate);
-  }, [selectedDate]);
+    if (user) {
+      loadData(selectedDate);
+    }
+  }, [user, selectedDate]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
   };
 
   const handleToggle = async (clientId: string, isPresent: boolean) => {
+    if (!user) return;
+
     const existingRecord = attendance.get(clientId);
     const newStatus =
       existingRecord?.status === (isPresent ? "present" : "absent")
@@ -60,10 +69,26 @@ export default function AttendancePage() {
       clientId,
       date: selectedDate,
       status: newStatus,
+      tenantId: tenantId,
     });
+    
+    // Optimistically update UI
+    const updatedAttendance = new Map(attendance);
+    const newRecord = {
+      clientId,
+      date: selectedDate,
+      status: newStatus,
+    };
 
-    // Refresh data after update
-    await loadData(selectedDate);
+    if (existingRecord) {
+        updatedAttendance.set(clientId, {...existingRecord, ...newRecord});
+    } else {
+        updatedAttendance.set(clientId, {id: `${selectedDate}_${clientId}`, ...newRecord});
+    }
+    setAttendance(updatedAttendance);
+    
+    // No full reload needed, but you can if optimistic update is not preferred.
+    // await loadData(selectedDate);
   };
 
   return (

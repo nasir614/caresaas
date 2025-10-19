@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               {/* Sidebar */}
               <Sidebar />
 
-              {/* Main content */}
+              {/* Main content area */}
               <div className="flex flex-1 flex-col bg-surface min-h-screen">
                 <Header />
                 <main className="flex-1 overflow-y-auto p-6">{children}</main>

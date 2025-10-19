@@ -4,7 +4,7 @@ import { auth } from "@/lib/firebase/config";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { Button } from "../ui/button";
-import { CircleUser } from "lucide-react";
+import { CircleUser, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,10 +34,7 @@ export default function Header() {
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
         <SidebarTrigger className="sm:hidden" />
         <Breadcrumbs />
-        <div className="relative ml-auto flex-1 md:grow-0">
-          {/* Search can be added back here if needed */}
-        </div>
-        {user && (
+        <div className="relative ml-auto flex items-center gap-3 md:grow-0">
            <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
@@ -46,15 +43,18 @@ export default function Header() {
                 </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>{user?.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
                 <DropdownMenuItem>Support</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2">
+                  <LogOut size={16} />
+                  <span>Logout</span>
+                </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-        )}
+        </div>
     </header>
   );
 }
